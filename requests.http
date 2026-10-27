@@ -1,0 +1,76 @@
+# APRENDIZAJE: archivo para probar la API sin Postman.
+# Funciona directo en Visual Studio 2022 / VS Code (extensión "REST Client") / Rider.
+# Primero levantá la API:  dotnet run --project src/Polizas.Api
+
+@host = http://localhost:5080
+
+### Health check
+GET {{host}}/health
+
+### Documento OpenAPI (solo en Development)
+GET {{host}}/openapi/v1.json
+
+### Listar pólizas (con filtros y paginación)
+GET {{host}}/api/polizas?estado=Vigente&pagina=1&tamanio=3
+
+### Buscar por tomador
+GET {{host}}/api/polizas?tomador=perez
+
+### Obtener una póliza
+GET {{host}}/api/polizas/1
+
+### Obtener una póliza inexistente -> 404 con ProblemDetails
+GET {{host}}/api/polizas/9999
+
+### Crear una póliza -> 201 + header Location
+POST {{host}}/api/polizas
+Content-Type: application/json
+
+{
+  "numero": "AUTO-0100",
+  "tomador": "Ana Martínez",
+  "sumaAsegurada": 8000000,
+  "prima": 120000,
+  "vigenciaDesde": "2026-11-01",
+  "vigenciaHasta": "2027-11-01"
+}
+
+### Crear con datos inválidos -> 400 con el detalle de cada campo
+POST {{host}}/api/polizas
+Content-Type: application/json
+
+{
+  "numero": "A",
+  "tomador": "",
+  "sumaAsegurada": 1000,
+  "prima": 0,
+  "vigenciaDesde": "2027-01-01",
+  "vigenciaHasta": "2026-01-01"
+}
+
+### Crear con número duplicado -> 409 (ejecutá dos veces el "Crear una póliza")
+
+### Actualizar una póliza
+PUT {{host}}/api/polizas/1
+Content-Type: application/json
+
+{
+  "numero": "AUTO-0001",
+  "tomador": "Juan Pérez",
+  "sumaAsegurada": 13000000,
+  "prima": 190000,
+  "vigenciaDesde": "2026-01-01",
+  "vigenciaHasta": "2027-01-01"
+}
+
+### Anular una póliza (ejecutala dos veces: la segunda da 409)
+POST {{host}}/api/polizas/2/anular
+
+### Eliminar una póliza -> 204
+DELETE {{host}}/api/polizas/3
+
+### Cotización del dólar (llama a un servicio externo con HttpClientFactory)
+GET {{host}}/api/cotizacion/dolar
+
+### Ciclo de vida de DI: ejecutalo varias veces y mirá qué Guid cambia
+GET {{host}}/api/demo/ciclo-de-vida
